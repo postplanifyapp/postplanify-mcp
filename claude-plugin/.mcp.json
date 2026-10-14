@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "postplanify": {
+      "type": "http",
+      "url": "https://api.postplanify.com/api/mcp"
+    }
+  }
+}
