@@ -143,7 +143,7 @@ Full parameter reference: [postplanify.com/mcp/docs](https://postplanify.com/mcp
 Prefer plain HTTP over MCP? The [`skills/postplanify`](skills/postplanify) folder is an agent skill that teaches any coding agent to use the PostPlanify REST API with `curl`.
 
 ```bash
-npx skills add postplanify/postplanify-mcp
+npx skills add postplanifyapp/postplanify-mcp
 ```
 
 It is also on ClawHub: `openclaw skills install @hasancagli/postplanify`.
