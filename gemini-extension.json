@@ -1,0 +1,11 @@
+{
+  "name": "postplanify",
+  "version": "1.0.0",
+  "description": "Schedule social media posts to Instagram, TikTok, LinkedIn, X, Facebook, YouTube, Threads, Pinterest, Bluesky and Google Business Profile, track analytics and reply to comments with PostPlanify.",
+  "mcpServers": {
+    "postplanify": {
+      "httpUrl": "https://api.postplanify.com/api/mcp"
+    }
+  },
+  "contextFileName": "GEMINI.md"
+}

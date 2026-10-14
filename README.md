@@ -104,6 +104,14 @@ Add to `cline_mcp_settings.json` (MCP Servers → Configure):
 }
 ```
 
+### Gemini CLI
+
+```bash
+gemini extensions install https://github.com/postplanifyapp/postplanify-mcp
+```
+
+Then run `/mcp auth postplanify` inside Gemini CLI to sign in.
+
 ### VS Code, Windsurf and other clients
 
 Any client that supports remote MCP servers works with the endpoint above. For clients that only support local (stdio) servers, use the `mcp-remote` bridge (requires Node.js):
