@@ -1,0 +1,12 @@
+{
+  "name": "postplanify",
+  "owner": { "name": "PostPlanify", "url": "https://postplanify.com" },
+  "description": "PostPlanify plugins for Claude.",
+  "plugins": [
+    {
+      "name": "postplanify",
+      "source": "./claude-plugin",
+      "description": "Schedule social media posts, plan your content calendar, track analytics and reply to comments with PostPlanify."
+    }
+  ]
+}
