@@ -1,0 +1,11 @@
+{
+  "name": "postplanify",
+  "displayName": "PostPlanify",
+  "version": "1.0.0",
+  "description": "Schedule social media posts to Instagram, TikTok, LinkedIn, X, Facebook, YouTube, Threads, Pinterest, Bluesky and Google Business Profile, plan your content calendar, track analytics and reply to comments with PostPlanify.",
+  "author": { "name": "PostPlanify", "url": "https://postplanify.com" },
+  "homepage": "https://postplanify.com/mcp/docs",
+  "repository": "https://github.com/postplanifyapp/postplanify-mcp",
+  "license": "MIT",
+  "keywords": ["social-media", "social-media-scheduling", "content-calendar", "instagram", "tiktok", "linkedin", "marketing", "analytics"]
+}
