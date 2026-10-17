@@ -29,6 +29,7 @@ https://api.postplanify.com/api/mcp
 ## What you can do
 
 - **Schedule posts across platforms.** Write once, adapt per platform and schedule to every account in one go. Images, videos and carousels supported.
+- **Upload media from your device.** Pick photos and videos in an upload box right inside Claude or ChatGPT, attach them in ChatGPT, or let coding agents upload local files directly, up to 300MB each.
 - **Plan your content calendar.** See what is scheduled and published, reschedule, edit or cancel posts.
 - **Know what is working.** Ask which posts performed best, how followers are growing and which accounts get the most engagement.
 - **Handle comments and reviews.** Read and reply to Instagram, Facebook and LinkedIn comments and Google Business reviews.
@@ -56,13 +57,13 @@ An active PostPlanify plan with API access. Sign up at [postplanify.com](https:/
 
 Clients that support OAuth open a browser window to sign in with your PostPlanify account. No key needed. For clients that do not, create an API key at [postplanify.com/dashboard/api-keys](https://postplanify.com/dashboard/api-keys).
 
-### Claude (claude.ai and Claude Desktop)
+### Claude (claude.ai, Claude Desktop and mobile)
 
-Settings → Connectors → **Add custom connector**, then paste `https://api.postplanify.com/api/mcp` and sign in.
+Open the [official PostPlanify connector in Claude](https://claude.ai/directory/postplanify-mcp-server), or go to Customize → Connectors and search for **PostPlanify**. Click **Connect** and sign in with your PostPlanify account.
 
 ### ChatGPT
 
-Search for **PostPlanify** in the ChatGPT apps/plugins directory, click install and sign in with your PostPlanify account.
+Open the [official PostPlanify plugin in ChatGPT](https://chatgpt.com/plugins/plugin_asdk_app_6a9bcfe6e92c8191ac747fef1411608b), click install and sign in with your PostPlanify account. You can also search for **PostPlanify** in the ChatGPT plugins directory.
 
 ### Claude Code
 
@@ -134,12 +135,12 @@ Any client that supports remote MCP servers works with the endpoint above. For c
 
 ## Tools
 
-22 tools, discovered automatically once connected. Read-only and destructive tools carry MCP annotations, so clients can ask before anything is published or deleted.
+26 tools, discovered automatically once connected. Read-only and destructive tools carry MCP annotations, so clients can ask before anything is published or deleted.
 
 | Category | Tools |
 |---|---|
 | Posts | `list_posts`, `create_post`, `get_post`, `edit_post`, `cancel_post`, `delete_post` |
-| Media | `upload_media_from_url`, `upload_media_from_base64`, `list_media`, `delete_media` |
+| Media | `open_upload_box`, `upload_attached_file`, `create_upload_url`, `finish_upload`, `upload_media_from_url`, `upload_media_from_base64`, `list_media`, `delete_media` |
 | Analytics | `get_brand_overview`, `get_account_analytics`, `get_analytics_trends` |
 | Comments | `list_comments`, `list_comment_replies`, `reply_to_comment` |
 | Accounts | `get_current_user`, `list_workspaces`, `get_workspace`, `list_social_accounts`, `get_social_account`, `list_pinterest_boards` |

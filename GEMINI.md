@@ -13,7 +13,7 @@ Use the PostPlanify server's tools. Every post goes to one social account, so po
 ## Prepare the post
 
 - **Times are UTC.** Convert the user's local time before calling `create_post`. If you don't know their timezone, ask. For "post now", schedule 2 to 5 minutes ahead.
-- **Media:** use `upload_media_from_url` for a public link, `upload_media_from_base64` for a file the user shared, or `list_media` with the `workspaceId` to reuse files from their PostPlanify library. Carousel order follows the order of `mediaIds`.
+- **Media:** use `upload_media_from_url` for a public link, or `list_media` with the `workspaceId` to reuse files from their PostPlanify library. For files on the user's device: if you can run shell commands, call `create_upload_url`, upload the file with curl, then `finish_upload`; in Claude or ChatGPT, call `open_upload_box` so the user picks the files; files attached in ChatGPT go through `upload_attached_file`. Use `upload_media_from_base64` only as a last resort for small files. Carousel order follows the order of `mediaIds`.
 - **Adapt the caption per platform** when posting the same message to several accounts.
 
 | Platform | Media | Caption limit | Required extra fields |

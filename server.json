@@ -1,0 +1,25 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "com.postplanify/mcp",
+  "title": "PostPlanify",
+  "description": "Schedule posts to Instagram, TikTok, LinkedIn, X and 6 more. Track analytics and reply to comments.",
+  "version": "1.0.0",
+  "websiteUrl": "https://postplanify.com/mcp/docs",
+  "repository": {
+    "url": "https://github.com/postplanifyapp/postplanify-mcp",
+    "source": "github"
+  },
+  "icons": [
+    {
+      "src": "https://postplanify.com/logo.png",
+      "mimeType": "image/png",
+      "sizes": ["500x500"]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://api.postplanify.com/api/mcp"
+    }
+  ]
+}

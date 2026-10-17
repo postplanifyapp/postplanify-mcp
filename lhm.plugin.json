@@ -1,7 +1,8 @@
 {
   "identifier": "postplanify",
   "name": "PostPlanify",
-  "version": "1.0.0",
+  "version": "1.1.0",
+  "category": "social",
   "description": "Schedule social media posts to Instagram, TikTok, LinkedIn, X, Facebook, YouTube, Threads, Pinterest, Bluesky and Google Business Profile from your AI assistant. Plan your content calendar, track analytics and reply to comments.",
   "author": "PostPlanify",
   "authorUrl": "https://postplanify.com",
@@ -81,7 +82,7 @@
     },
     {
       "name": "list_pinterest_boards",
-      "description": "List Pinterest boards for a Pinterest account. Required when creating Pinterest posts; you must specify a boardId.",
+      "description": "List Pinterest boards for a Pinterest account. Pinterest posts need one of these board IDs as pinterestParams.boardId.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -121,13 +122,13 @@
     },
     {
       "name": "upload_media_from_base64",
-      "description": "Upload a local file as base64. Use this when the user pastes an image or provides a local file path.\n\nSTEPS: Read the file with your file reading tool, then pass the raw base64 string directly to this tool. Do NOT compress, resize, or re-encode the file. Just read and pass it as-is.\n\nMax size: 20MB (covers virtually all images). Supports: JPEG, PNG, GIF, WebP, MP4, MOV, PDF. After uploading, use the returned media ID when creating posts.",
+      "description": "Last resort for small files: upload a file sent as a base64-encoded string. Prefer, in order: upload_attached_file for files the user attached in this chat (ChatGPT); create_upload_url + finish_upload if you can run shell commands (curl); open_upload_box to let the user pick files from their device; upload_media_from_url for public links. The file is stored exactly as received, without compression or resizing.\n\nMax size: 7MB. Supports: JPEG, PNG, GIF, WebP, MP4, MOV, PDF. Returns a media ID that can be attached to a post.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "data": {
             "type": "string",
-            "description": "Base64-encoded file content"
+            "description": "Base64-encoded file content (raw base64 or a data URI)"
           },
           "filename": {
             "type": "string",
@@ -157,14 +158,120 @@
       }
     },
     {
+      "name": "upload_attached_file",
+      "description": "ChatGPT only: upload an image or video the user attached in ChatGPT. Other clients: use open_upload_box (user picks files from their device), create_upload_url (if you can run curl) or upload_media_from_url instead. Call it once per file; for a carousel, upload each file and pass the returned media IDs to create_post in carousel order. For public links use upload_media_from_url. Supports: JPEG, PNG, GIF, WebP, MP4, MOV, PDF. Returns a media ID that can be attached to a post.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "object",
+            "properties": {
+              "download_url": {
+                "type": "string",
+                "description": "Download URL of the attached file"
+              },
+              "file_id": {
+                "type": "string",
+                "description": "ID of the attached file"
+              },
+              "mime_type": {
+                "type": "string",
+                "description": "MIME type of the file"
+              },
+              "file_name": {
+                "type": "string",
+                "description": "Original file name"
+              }
+            },
+            "required": [
+              "download_url",
+              "file_id"
+            ],
+            "additionalProperties": false,
+            "description": "The file the user attached in chat"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    },
+    {
+      "name": "open_upload_box",
+      "description": "Show an upload box in the chat so the user can pick files from their own device (images, videos or PDFs, up to 300MB each, up to 20 files) and put them in carousel order. Use this when the user wants to post files from their computer or phone that are not at a public URL. If the user already attached the files in this chat, do not ask them to upload again: use upload_attached_file instead (ChatGPT). Use the upload box only when the files are not in the chat yet, or for videos and files too large to attach. After they upload, the user sends a message with the media IDs in order: pass them to create_post in that order. Do not call other upload tools for those files.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    },
+    {
+      "name": "create_upload_url",
+      "description": "Get a one-time URL to upload a file from the user's device directly, up to 300MB (images, videos, PDFs). Steps: 1) call this, 2) POST the file to uploadUrl as multipart/form-data: every entry of fields, then the file as \"file\" (last), (e.g. curl -F \"key=<fields.key>\" -F \"Content-Type=<fields.Content-Type>\" ... one -F per field ... -F \"file=@photo.jpg\" \"<uploadUrl>\"), 3) call finish_upload with the uploadId to get the media ID. The URL expires after 15 minutes. Supports: JPEG, PNG, GIF, WebP, MP4, MOV, PDF.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "fileName": {
+            "type": "string",
+            "description": "File name with extension (e.g. \"video.mp4\")"
+          },
+          "mimeType": {
+            "type": "string",
+            "enum": [
+              "image/jpeg",
+              "image/png",
+              "image/gif",
+              "image/webp",
+              "video/mp4",
+              "video/quicktime",
+              "application/pdf"
+            ],
+            "description": "MIME type of the file"
+          },
+          "size": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "description": "File size in bytes, if known"
+          }
+        },
+        "required": [
+          "fileName",
+          "mimeType"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    },
+    {
+      "name": "finish_upload",
+      "description": "After the file was uploaded to the URL from create_upload_url, call this with its uploadId. Returns the media ID to pass to create_post. For a carousel, finish each file and pass the IDs in carousel order.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "uploadId": {
+            "type": "string",
+            "description": "The uploadId returned by create_upload_url"
+          }
+        },
+        "required": [
+          "uploadId"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    },
+    {
       "name": "list_media",
-      "description": "List media you can attach to posts. IMPORTANT: to see a workspace's media library (the files the user uploaded in the PostPlanify dashboard), you MUST pass workspaceId; this is almost always what the user means by \"my media\" or \"my photos/videos\". Without workspaceId you only get files uploaded through the API/MCP, which is usually a small or empty subset. When the user refers to a workspace by name, call list_workspaces first to get its id, then pass it here. Use the returned ids with create_post; library and uploaded media both work. Each item has a \"source\" of \"library\" or \"upload\".",
+      "description": "List media that can be attached to posts. With workspaceId, returns that workspace's media library (the files uploaded in the PostPlanify dashboard) plus files uploaded through the API/MCP. Without workspaceId, returns only files uploaded through the API/MCP. Both kinds of media ids work in create_post. Each item has a \"source\" of \"library\" or \"upload\".",
       "inputSchema": {
         "type": "object",
         "properties": {
           "workspaceId": {
             "type": "string",
-            "description": "REQUIRED to list a workspace's dashboard media library. Omit only when you specifically want just your API/MCP uploads (rare)."
+            "description": "Workspace ID. Needed to include the workspace's dashboard media library; without it only API/MCP uploads are returned."
           },
           "type": {
             "type": "string",
@@ -210,7 +317,7 @@
     },
     {
       "name": "list_posts",
-      "description": "List posts with filters. Returns paginated results. workspaceId is required. Statuses: SCHEDULED, PUBLISHED, CANCELLED, RESCHEDULED.\n\nSet includeMetrics to true to attach each post's latest performance figures (views, likes, comments, shares, engagement rate). Use this to compare how posts performed instead of fetching them one at a time. A null metrics field means no analytics have been collected for that post, which is not the same as zero: never report it as zero.",
+      "description": "List posts with filters. Returns paginated results. workspaceId is required. Statuses: SCHEDULED, PUBLISHED, CANCELLED, RESCHEDULED.\n\nSet includeMetrics to true to attach each post's latest performance figures (views, likes, comments, shares, engagement rate). Use this to compare how posts performed instead of fetching them one at a time. A null metrics field means no analytics have been collected for that post, which is different from zero.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -281,7 +388,7 @@
     },
     {
       "name": "create_post",
-      "description": "Create and schedule a new social media post.\n\nWORKFLOW:\n1. Use list_social_accounts to get the target account ID\n2. If the post includes media, upload it first using upload_media_from_url\n3. Call this tool with the account ID and media IDs\n\nPLATFORM NOTES:\n- Instagram: Requires at least 1 image or video\n- YouTube: Requires 1 video + youtubeTitle\n- Pinterest: Requires pinterestBoardId (use list_pinterest_boards)\n- TikTok: Requires at least 1 image or video\n- X/Twitter: Max 280 chars, max 4 media\n- Google Business: topicType STANDARD (default), EVENT, or OFFER. EVENT/OFFER require eventTitle + startDate + endDate.\n\nscheduledAt must be a future ISO 8601 datetime.",
+      "description": "Create and schedule a new social media post for one social account. socialAccountId comes from list_social_accounts. mediaIds come from: upload_attached_file (files attached in ChatGPT), open_upload_box (user uploads files from their device, best for local files and videos), create_upload_url + finish_upload (if you can run curl), upload_media_from_url (public links) or list_media. Pass mediaIds in carousel order.\n\nPLATFORM NOTES:\n- Instagram: Requires at least 1 image or video\n- YouTube: Requires 1 video and youtubeParams.title\n- Pinterest: Requires pinterestParams.boardId (board IDs come from list_pinterest_boards)\n- TikTok: Requires at least 1 image or video\n- X/Twitter: Max 280 chars, max 4 media\n- Google Business: topicType STANDARD (default), EVENT, or OFFER. EVENT/OFFER require eventTitle + startDate + endDate.\n\nscheduledAt must be a future ISO 8601 datetime.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -306,7 +413,7 @@
             "items": {
               "type": "string"
             },
-            "description": "Array of media IDs to attach (upload first)"
+            "description": "Media IDs to attach (upload first), in carousel order"
           },
           "isStory": {
             "type": "boolean",
@@ -351,7 +458,7 @@
             "properties": {
               "boardId": {
                 "type": "string",
-                "description": "Board ID (required); call list_pinterest_boards to get available boards"
+                "description": "Board ID (required). Board IDs come from list_pinterest_boards"
               }
             },
             "required": [
@@ -448,7 +555,7 @@
     },
     {
       "name": "get_post",
-      "description": "Get detailed info about a specific post including content, status, media, publishing logs, and its latest performance metrics (views, likes, comments, shares, engagement rate).\n\nThe `metrics` field is null when the post has not been published yet, or when no analytics have been collected for it. A null metric means no data, not a zero: never report it as zero.",
+      "description": "Get detailed info about a specific post including content, status, media, publishing logs, and its latest performance metrics (views, likes, comments, shares, engagement rate).\n\nThe `metrics` field is null when the post has not been published yet, or when no analytics have been collected for it. A null metric means no data was collected, which is different from zero.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -684,7 +791,7 @@
     },
     {
       "name": "cancel_post",
-      "description": "Cancel a scheduled post. Only scheduled posts can be cancelled. Cancelled posts cannot be rescheduled; create a new post instead.",
+      "description": "Cancel a scheduled post. Only scheduled posts can be cancelled. Cancelled posts cannot be rescheduled; a new post is needed instead.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -720,7 +827,7 @@
     },
     {
       "name": "get_account_analytics",
-      "description": "Get analytics data for a specific social account; includes account-level metrics (followers, following) and post-level metrics (views, likes, comments, engagement rate). Returns platform-specific data format.",
+      "description": "Get analytics data for a specific social account. Includes account-level metrics (followers, following) and post-level metrics (views, likes, comments, engagement rate). Returns platform-specific data format.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -743,7 +850,7 @@
     },
     {
       "name": "get_analytics_trends",
-      "description": "Get historical trend data for a social account; follower growth and engagement metrics over time. Returns daily snapshots for the specified number of days.",
+      "description": "Get historical trend data for a social account: follower growth and engagement metrics over time. Returns daily snapshots for the specified number of days.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -772,7 +879,7 @@
     },
     {
       "name": "get_brand_overview",
-      "description": "Get an aggregated analytics overview for a workspace; includes all connected social accounts with 7-day metrics (views, engagement, follower changes), top 10 posts, and daily view/engagement trends over the same window.",
+      "description": "Get an aggregated analytics overview for a workspace. Includes all connected social accounts with 7-day metrics (views, engagement, follower changes), top 10 posts, and daily view/engagement trends over the same window.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -837,7 +944,7 @@
     },
     {
       "name": "list_comment_replies",
-      "description": "Fetch the direct replies to a specific comment. Use the `id` returned from list_comments as the platformCommentId. For LinkedIn URNs, pass the raw value as-is (e.g. \"urn:li:comment:(activity:123,456)\"); no URL encoding.",
+      "description": "Fetch the direct replies to a specific comment. Use the `id` returned from list_comments as the platformCommentId. For LinkedIn URNs, pass the raw value as-is (e.g. \"urn:li:comment:(activity:123,456)\"), without URL encoding.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -855,7 +962,7 @@
     },
     {
       "name": "reply_to_comment",
-      "description": "Post a public reply to a comment on its originating platform. The reply is published immediately. Platform length limits: Instagram 2200, Facebook 8000, LinkedIn 1250, Google Business 4096 characters. Cannot reply to hidden comments. On success, the parent comment's `brandReplied` flag is set to true. For LinkedIn, pass the raw URN as platformCommentId; no URL encoding.",
+      "description": "Post a public reply to a comment on its originating platform. The reply is published immediately. Platform length limits: Instagram 2200, Facebook 8000, LinkedIn 1250, Google Business 4096 characters. Cannot reply to hidden comments. On success, the parent comment's `brandReplied` flag is set to true. For LinkedIn, pass the raw URN as platformCommentId, without URL encoding.",
       "inputSchema": {
         "type": "object",
         "properties": {
